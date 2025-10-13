@@ -1,0 +1,22 @@
+version: '0.1'
+
+services:
+  blog-webhook-handler:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      # 挂载配置目录，方便修改配置
+      - ./config:/app/config:ro
+      # 挂载日志目录
+      - ./logs:/app/logs
+      # 挂载博客文章目标目录（根据实际情况调整路径）
+      - /var/www/blog/posts:/var/www/blog/posts
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
