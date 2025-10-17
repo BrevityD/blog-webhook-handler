@@ -35,7 +35,8 @@ def create_app():
     app.config['SECRET_KEY'] = config.get('server.secret_key', 'dev-secret-key')
     
     # GitHub Webhook 配置
-    app.config['GIT_REPO_URL'] = config.get('github.repo_url')
+    app.config['GIT_PAT_URL'] = config.get('github.pat_url')
+    app.config['GIT_REPO_NAME'] = config.get('github.repo_name')
     app.config['GIT_LOCAL_PATH'] = config.get('github.local_path')
     app.config['GIT_BRANCH'] = config.get('github.branch', 'main')
     
@@ -45,29 +46,34 @@ def create_app():
     
     # GitHub Webhook 密钥（用于安全验证）
     app.config['GITHUB_WEBHOOK_SECRET'] = config.get('github.webhook_secret')
+    app.config['GITHUB_PAT'] = config.get('github.personal_access_token')
     
     # 注册蓝图
     app.register_blueprint(github_webhook_bp, url_prefix='/webhook')
     
     @app.route('/')
     def hello_world():
+        logger.info(f"hello world is triggered")
         return 'Blog Webhook Handler is running!'
     
     @app.route('/health')
     def health_check():
+        logger.info(f"health is triggered")
         return {'status': 'healthy'}, 200
     
     return app
 
 if __name__ == '__main__':
+    import json
     setup_logging()
     app = create_app()
     config = ConfigLoader()
     logger.info("Starting Blog Webhook Handler...")
     
     host = config.get('server.host', '0.0.0.0')
-    port = config.get('server.port', 5000)
+    port = config.get('server.port', 13134)
     debug = config.get('server.debug', False)
     
     logger.info(f"Server will start on {host}:{port}")
+    logger.info(f"Server is started with configs:{json.dumps(config._config, indent=4)}")
     app.run(host=host, port=port, debug=debug)

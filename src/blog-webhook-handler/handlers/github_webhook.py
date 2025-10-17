@@ -13,6 +13,7 @@ def handle_github_webhook():
     """处理 GitHub Webhook 请求"""
     try:
         # 验证签名
+        logger.debug(f"handler is triggered with request content: \n{request}")
         if not verify_github_signature(request):
             logger.warning("Invalid webhook signature")
             return jsonify({'error': 'Invalid signature'}), 401
@@ -47,7 +48,10 @@ def handle_push_event(payload):
     
     # 初始化 Git 管理器
     git_manager = GitManager(
-        repo_url=current_app.config['GIT_REPO_URL'],
+        repo_url=current_app.config['GIT_PAT_URL'].format(
+            github_pat=current_app.config['GITHUB_PAT'],
+            repo_name=current_app.config['GIT_REPO_NAME']
+            ),
         local_path=current_app.config['GIT_LOCAL_PATH'],
         branch=current_app.config.get('GIT_BRANCH', 'main')
     )
