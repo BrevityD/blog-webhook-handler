@@ -1,5 +1,8 @@
 import os
+import json
 import shutil
+import time
+import yaml
 from pathlib import Path
 from loguru import logger
 
@@ -11,6 +14,7 @@ class PostProcessor:
         self.target_dir = target_dir
         # 所有支持的文件类型
         self.supported_extensions = {'.md'}
+        self.supported_assets = {'.jpg', '.jpeg', '.png'}
         
     def process_all_posts(self) -> int:
         """处理所有文章文件"""
@@ -37,20 +41,44 @@ class PostProcessor:
     
     def _process_single_post(self, source_file: Path, target_dir: Path):
         """处理单个文章文件"""
-        # 构建目标文件路径
-        post_proj_name = source_file.name.replace(source_file.suffix, "")
-        target_file = target_dir / post_proj_name / ("index"+source_file.suffix)
-        
-        # 确保目标目录存在
+        proj_name = source_file.parent.name
+        target_file = target_dir / proj_name / ("index"+source_file.suffix)
         target_file.parent.mkdir(parents=True, exist_ok=True)
-        
-        # 复制文件（这里可以根据需要进行内容处理）
         shutil.copy2(source_file, target_file)
-        
-        # 可以在这里添加更多的处理逻辑，比如：
-        # - 转换 Markdown 到 HTML
-        # - 添加元数据
-        # - 生成摘要
-        # - 图片处理等
-        
         logger.debug(f"Copied {source_file} to {target_file}")
+        for file_path in source_file.parent.glob("*"):
+            if file_path.is_file() and file_path.suffix.lower() in self.supported_assets:
+                source_asset = file_path
+                target_asset = target_dir / proj_name / source_asset.name
+                shutil.copy2(source_asset, target_asset)
+                logger.debug(f"Copied {source_asset} to {target_asset}")
+
+        self._process_post_content(source_file, target_file)
+        logger.info(f"An article is created: {target_file}")
+    
+    def _process_post_content(self, source_file: Path, target_file: Path):
+        """处理单个post的文件头等"""
+        post_config_file = source_file.parent / "config.json"
+        post_config = {
+            "title": source_file.parent.name,
+            "description": "结垒发布了一篇文章\n该描述由BrevityD/blog-webhook-handler自动生成，点个star求求了",
+            "date": time.strftime("%Y-%m-%d", time.localtime(time.time()+60*60*8)),
+            "lastmod": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()+60*60*8))
+        }
+        if post_config_file.exists():
+            with open(post_config_file, "r", encoding="utf8") as f:
+                post_config.update(json.load(f))
+        header = self._post_config2header(post_config)
+        with open(target_file, "r+") as wf:
+            old = wf.read()
+            wf.seek(0)
+            wf.write(header)
+            wf.write(old)
+        logger.debug(f"Article {target_file.parent.name} with header {header}")
+        
+    
+    def _post_config2header(self, post_config):
+        header = "---\n{config}---\n\n"
+        config = yaml.dump(post_config, allow_unicode=True, sort_keys=False)
+        header = header.format(config=config)
+        return header
