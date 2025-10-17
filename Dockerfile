@@ -10,7 +10,6 @@ RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debi
 
 # 复制项目文件
 COPY ./ ./
-# 复制github ssh key
 
 # 安装 Python 依赖
 RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ \
