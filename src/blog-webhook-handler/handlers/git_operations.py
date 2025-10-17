@@ -1,5 +1,5 @@
-import os
 import subprocess
+from pathlib import Path
 from typing import Optional
 from loguru import logger
 
@@ -8,7 +8,7 @@ class GitManager:
     
     def __init__(self, repo_url: str, local_path: str, branch: str = 'main'):
         self.repo_url = repo_url
-        self.local_path = local_path
+        self.local_path = Path(local_path)
         self.branch = branch
         
     def _run_git_command(self, command: list, cwd: Optional[str] = None) -> str:
@@ -26,40 +26,30 @@ class GitManager:
             logger.error(f"Git command failed: {e.stderr}")
             raise
     
-    def clone_if_not_exists(self):
-        """如果本地目录不存在，则克隆仓库"""
-        if not os.path.exists(self.local_path):
-            logger.info(f"Cloning repository to {self.local_path}")
-            os.makedirs(os.path.dirname(self.local_path), exist_ok=True)
+    def _clone_or_pull(self):
+        """克隆仓库"""
+        if not self.local_path.exists():
+            self.local_path.mkdir(parents=True, exist_ok=True)
+            logger.info(f"Cloning repository to {self.local_path.as_posix()}")
             self._run_git_command([
                 'git', 'clone', 
                 '--branch', self.branch,
                 self.repo_url, 
-                self.local_path
+                self.local_path.as_posix()
             ])
         else:
-            logger.info(f"Repository already exists at {self.local_path}")
+            logger.info(f"Pulling repository to {self.local_path.as_posix()}")
+            self._run_git_command(
+                command = [
+                    'git', 'pull',
+                    self.repo_url
+                ],
+                cwd = self.local_path.as_posix()
+            )
     
     def pull_latest(self):
         """拉取最新代码"""
         # 确保仓库存在
-        self.clone_if_not_exists()
-        
-        logger.info(f"Pulling latest changes from {self.branch}")
-        
-        # 获取当前分支
-        current_branch = self._run_git_command(['git', 'branch', '--show-current'])
-        
-        # 如果不在目标分支，切换到目标分支
-        if current_branch != self.branch:
-            logger.info(f"Switching from {current_branch} to {self.branch}")
-            self._run_git_command(['git', 'checkout', self.branch])
-        
-        # 拉取最新代码
-        self._run_git_command(['git', 'pull', 'origin', self.branch])
-        
+        self._clone_or_pull()
         logger.info("Successfully pulled latest changes")
-    
-    def get_latest_commit_hash(self) -> str:
-        """获取最新提交的哈希值"""
-        return self._run_git_command(['git', 'rev-parse', 'HEAD'])
+
