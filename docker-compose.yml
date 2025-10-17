@@ -1,0 +1,12 @@
+version: '0.1'
+
+services:
+  blog-webhook-handler:
+    build: .
+    ports:
+      - "13134:13134"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - # your volumes
+    restart: unless-stopped

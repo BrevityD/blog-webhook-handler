@@ -1,0 +1,25 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 13134,
+    "debug": false,
+    "secret_key": "your-secret-key-here"
+  },
+  "github": {
+    "webhook_secret": null,
+    "pat_url": "https://x-access-token:{github_pat}@github.com/{repo_name}.git",
+    "repo_name": "",
+    "local_path": "/data/blog-repo",
+    "personal_access_token": "",
+    "branch": "main"
+  },
+  "posts": {
+    "source_dir": "/data/blog-repo/posts",
+    "target_dir": "/data/blog-target/post"
+  },
+  "logging": {
+    "level": "DEBUG",
+    "file": "logs/webhook.log",
+    "rotation": "10 MB"
+  }
+}
