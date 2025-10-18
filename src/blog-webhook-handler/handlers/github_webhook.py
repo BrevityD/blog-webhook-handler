@@ -48,10 +48,7 @@ def handle_push_event(payload):
     
     # 初始化 Git 管理器
     git_manager = GitManager(
-        repo_url=current_app.config['GIT_PAT_URL'].format(
-            github_pat=current_app.config['GITHUB_PAT'],
-            repo_name=current_app.config['GIT_REPO_NAME']
-            ),
+        repo_url=current_app.config['GIT_REPO_URL'],
         local_path=current_app.config['GIT_LOCAL_PATH'],
         branch=current_app.config.get('GIT_BRANCH', 'main')
     )
