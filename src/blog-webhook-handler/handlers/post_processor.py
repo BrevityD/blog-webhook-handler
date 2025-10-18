@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import shutil
 import time
 import yaml
@@ -42,6 +43,7 @@ class PostProcessor:
     def _process_single_post(self, source_file: Path, target_dir: Path):
         """处理单个文章文件"""
         proj_name = source_file.parent.name
+        proj_name = re.sub(r'[^\w\u4e00-\u9fff]', '', proj_name)
         target_file = target_dir / proj_name / ("index"+source_file.suffix)
         target_file.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source_file, target_file)
