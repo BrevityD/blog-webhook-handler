@@ -21,9 +21,5 @@ RUN mkdir -p logs
 # 暴露端口
 EXPOSE 13134
 
-# github ssh鉴权
-COPY ~/.ssh/id_ed25519 /root/.ssh/id_ed25519
-RUN chmod 600 /root/.ssh/id_ed25519
-
 # 启动应用
 CMD ["python", "-m", "src.blog-webhook-handler.app"]
