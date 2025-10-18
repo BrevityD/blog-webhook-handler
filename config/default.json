@@ -3,11 +3,14 @@
     "host": "0.0.0.0",
     "port": 13134,
     "debug": false,
-    "secret_key": "your-secret-key-here"
+    "secret_key": "your-secret-key-here",
+    "allow_manually_pull": true
   },
   "github": {
     "webhook_secret": null,
+    "use_ssh": true,
     "pat_url": "https://x-access-token:{github_pat}@github.com/{repo_name}.git",
+    "ssh_url": "git@github.com:{repo_name}.git",
     "repo_name": "",
     "local_path": "/data/blog-repo",
     "personal_access_token": "",
