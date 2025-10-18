@@ -7,6 +7,7 @@ services:
       - "13134:13134"
     environment:
       - PYTHONUNBUFFERED=1
+      - GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no'
     volumes:
       - # your volumes
     restart: unless-stopped
