@@ -64,8 +64,8 @@ class PostProcessor:
         post_config = {
             "title": source_file.parent.name,
             "description": "结垒发布了一篇文章\n该描述由BrevityD/blog-webhook-handler自动生成，点个star求求了",
-            "date": time.strftime("%Y-%m-%d", time.localtime(time.time()+60*60*8)),
-            "lastmod": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()+60*60*8))
+            "date": time.strftime("%Y-%m-%d+8:00"),
+            "lastmod": time.strftime("%Y-%m-%dT%H:%M:%S+8:00")
         }
         if post_config_file.exists():
             with open(post_config_file, "r", encoding="utf8") as f:
